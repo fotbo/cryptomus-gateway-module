@@ -7,14 +7,14 @@ from .request_exceptions import RequestExceptionsBuilder
 
 class RequestBuilder:
 
-    def __init__(self, secret_key: str, merchant_uuid: str, api_url: str ):
+    def __init__(self, api_key: str, merchant_uuid: str, api_url: str ):
         """
         :param str secret_key:
         :param str merchant_uuid:
         :param
         """
         self.api_url = api_url
-        self.secret_key = secret_key
+        self.secret_key = api_key
         self.merchant_uuid = merchant_uuid
 
     def send_request(self, uri: str, data: dict):

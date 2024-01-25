@@ -3,12 +3,12 @@ from .request_builder import RequestBuilder
 
 class Payment:
 
-    def __init__(self, payment_key: str, merchant_uuid: str, api_url: str):
-        self.payment_key = payment_key
+    def __init__(self, api_key: str, merchant_uuid: str, api_url: str):
+        self.payment_key = api_key
         self.merchant_uuid = merchant_uuid
         self.version = 'v1'
         self.requestBuilder = RequestBuilder(
-            payment_key,
+            api_key,
             merchant_uuid,
             api_url)
 

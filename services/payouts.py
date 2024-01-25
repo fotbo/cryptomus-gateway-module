@@ -3,11 +3,11 @@ from .request_builder import RequestBuilder
 
 class Payout:
 
-    def __init__(self, payout_key: str, merchant_uuid: str):
-        self.payment_key = payout_key
+    def __init__(self, api_key: str, merchant_uuid: str):
+        self.payment_key = api_key
         self.merchant_uuid = merchant_uuid
         self.version = 'v1'
-        self.request_builder = RequestBuilder(payout_key, merchant_uuid)
+        self.request_builder = RequestBuilder(api_key, merchant_uuid)
 
     def create(self, data):
         """

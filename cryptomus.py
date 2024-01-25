@@ -4,6 +4,10 @@ from rest_framework.response import Response
 from rest_framework import status
 
 import logging
+import json
+import base64
+import hashlib
+
 from .services.client import Client
 from .services.request_builder import RequestBuilder
 from .operations import PaymentProcess
@@ -13,15 +17,23 @@ from .conf import conf
 from fleio.billing.gateways.decorators import gateway_action, staff_gateway_action
 from fleio.billing.gateways import exceptions as gateway_exceptions
 from fleio.billing.models import Invoice
-from fleio.core.utils import fleio_join_url
-from fleio.settings import FRONTEND_URL
- 
+
 LOG = logging.getLogger(__name__)
 
 payment = Client.payment(
     conf.api_key,
     conf.merchant_id,
     conf.api_url)
+
+def check_signature(data):
+    sign = data['sign']
+    del data['sign']
+    json_body_data = json.dumps(data, ensure_ascii=False, separators=(',', ':'))
+    json_body_data_binary = json_body_data.encode('utf-8')
+    encoded_data = base64.b64encode(json_body_data_binary)
+    sign_md5_obj = hashlib.md5(encoded_data + conf.api_key.encode('utf-8'))
+    if sign_md5_obj.hexdigest() != sign:
+        raise Exception('Hash is not valid')
 
 @gateway_action(methods=['GET'])
 def pay_invoice(request):
@@ -49,6 +61,7 @@ def pay_invoice(request):
 @gateway_action(methods=['POST'])
 def callback(request):
     try:
+        check_signature(request.data)
         payment_info = payment.info({
             "order_id": request.data.get("order_id")})
         if payment_info.get('payment_status') == 'paid':
