@@ -54,7 +54,9 @@ def pay_invoice(request):
         "amount": str(inv.balance),
         "currency": inv.currency.code,
         "order_id": invoice_id,
-        "url_callback": conf.url_callback
+        "url_success": conf.url_success,
+        "url_callback": conf.url_callback,
+        "subtract": conf.subtract
     })
     return HttpResponseRedirect(result.get('url'))
 
@@ -62,14 +64,9 @@ def pay_invoice(request):
 def callback(request):
     try:
         check_signature(request.data)
-        payment_info = payment.info({
-            "order_id": request.data.get("order_id")})
-        if payment_info.get('payment_status') == 'paid':
-            payment_process = PaymentProcess(rq_data=request.data)
-            payment_process.process_charge()
-            return Response({'detail': 'OK'}, status=status.HTTP_200_OK)
-        else:
-            raise Exception(f"Payment is not paid. Status - {payment_info.get('payment_status').upper()}")
+        payment_process = PaymentProcess(rq_data=request.data)
+        payment_process.process_charge()
+        return Response({'detail': 'OK'}, status=status.HTTP_200_OK)
     except Exception as err:
         LOG.error(f"Payment error - {err}")
         return Response(

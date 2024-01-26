@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict
+from typing import Dict, List
 import logging
 import datetime
 import json
@@ -18,16 +18,27 @@ LOG = logging.getLogger(__name__)
 
 @dataclass
 class PaymentProcess():
+    PAID_STATUSES: List[str] = [
+        'paid',
+        'paid_over'
+    ]
+
+    CRYPTOMUS_ERROR_STATUSES: List[str] = [
+        'fail',
+        'system_fail',
+        'wrong_amount',
+        'cancel'
+    ]
+
     rq_data: Dict[str, str]
 
-    def charge_status(self, status):
-        if status == 'paid':
+    def charge_status(self, status: str) -> TransactionStatus:
+        if status in self.PAID_STATUSES:
             return TransactionStatus.SUCCESS
-        elif status == 'fail':
+        elif status in self.CRYPTOMUS_ERROR_STATUSES:
             return TransactionStatus.FAILURE
 
-    def process_charge(self):
-        """Process a charge result"""
+    def process_charge(self) -> None:
         gateway = Gateway.objects.get(name='cryptomus')
         external_id = self.rq_data.get('order_id', None)
         transaction_id = None
@@ -40,7 +51,7 @@ class PaymentProcess():
                     gateway=gateway)
                 transaction_id = existing_transaction.id
             except Transaction.DoesNotExist:
-                real_amount = self.rq_data.get('amount')
+                real_amount = round(float(self.rq_data.get('amount')), 2)
                 serializer_data = {'invoice': invoice_id,
                                    'external_id': external_id,
                                    'amount': real_amount,
@@ -68,7 +79,7 @@ class PaymentProcess():
                              data=datetime.datetime.now(),
                              error=(self.rq_data.get('status') == 'fail'))
         if transaction_status == TransactionStatus.FAILURE:
-            raise exceptions.GatewayException('Transaction is Fail')
+            raise exceptions.GatewayException(f"Transaction is Fail. Status - {self.rq_data.get('status').upper()}")
         else:
             if transaction_status == TransactionStatus.SUCCESS:
                 activity_helper.start_generic_activity(
