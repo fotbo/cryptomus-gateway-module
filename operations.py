@@ -18,24 +18,15 @@ LOG = logging.getLogger(__name__)
 
 @dataclass
 class PaymentProcess():
-    PAID_STATUSES: List[str] = [
-        'paid',
-        'paid_over'
-    ]
-
-    CRYPTOMUS_ERROR_STATUSES: List[str] = [
-        'fail',
-        'system_fail',
-        'wrong_amount',
-        'cancel'
-    ]
 
     rq_data: Dict[str, str]
 
     def charge_status(self, status: str) -> TransactionStatus:
-        if status in self.PAID_STATUSES:
+        paid_statuses = ['paid', 'paid_over']
+        error_statuses = ['fail', 'system_fail', 'wrong_amount', 'cancel']
+        if status in paid_statuses:
             return TransactionStatus.SUCCESS
-        elif status in self.CRYPTOMUS_ERROR_STATUSES:
+        elif status in error_statuses:
             return TransactionStatus.FAILURE
 
     def process_charge(self) -> None:
