@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpRequest
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -25,7 +25,7 @@ payment = Client.payment(
     conf.merchant_id,
     conf.api_url)
 
-def check_signature(data):
+def check_signature(data: dict) -> None | Exception:
     sign = data['sign']
     del data['sign']
     json_body_data = json.dumps(data, ensure_ascii=False, separators=(',', ':'))
@@ -36,7 +36,7 @@ def check_signature(data):
         raise Exception('Hash is not valid')
 
 @gateway_action(methods=['GET'])
-def pay_invoice(request):
+def pay_invoice(request: HttpRequest) -> HttpResponseRedirect:
     invoice_id = request.query_params.get('invoice')
     if invoice_id is None:
         LOG.error("An 'invoice' parameter is required")
@@ -61,7 +61,7 @@ def pay_invoice(request):
     return HttpResponseRedirect(result.get('url'))
 
 @gateway_action(methods=['POST'])
-def callback(request):
+def callback(request: HttpRequest) -> Response:
     try:
         check_signature(request.data)
         payment_process = PaymentProcess(rq_data=request.data)
