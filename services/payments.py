@@ -64,7 +64,7 @@ class Payment:
         :raise RequestBuilderException
         """
         if parameters is None:
-            paramenters = {}
+            parameters = {}
 
         uri = self.version + '/payment/services'
         return self.requestBuilder.send_request(uri, parameters)
@@ -104,10 +104,3 @@ class Payment:
         """
         uri = self.version + '/wallet'
         return self.requestBuilder.send_request(uri, data)
-
-
-
-
-
-
-
