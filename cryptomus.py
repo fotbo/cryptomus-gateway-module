@@ -56,7 +56,8 @@ def pay_invoice(request: HttpRequest) -> HttpResponseRedirect:
         "order_id": invoice_id,
         "url_success": conf.url_success,
         "url_callback": conf.url_callback,
-        "subtract": conf.subtract
+        "subtract": conf.subtract,
+        "is_refresh": True
     })
     return HttpResponseRedirect(result.get('url'))
 
