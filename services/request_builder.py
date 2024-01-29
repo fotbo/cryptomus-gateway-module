@@ -7,7 +7,7 @@ from .request_exceptions import RequestExceptionsBuilder
 
 class RequestBuilder:
 
-    def __init__(self, api_key: str, merchant_uuid: str, api_url: str ):
+    def __init__(self, api_key: str, merchant_uuid: str, api_url: str):
         """
         :param str secret_key:
         :param str merchant_uuid:
