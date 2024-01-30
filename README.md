@@ -53,3 +53,5 @@ CRYPTOMUS_SETTINGS = {
 }
 ```
 
+Save and restart fleio.
+After restarting, you will have the option to enable the module for users in the graphical interface.
