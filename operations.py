@@ -6,7 +6,6 @@ import json
 from fleio.activitylog.utils.activity_helper import activity_helper
 from fleio.billing.gateways import exceptions
 from fleio.billing.invoicing.tasks import invoice_add_payment
-# from fleio.billing.invoicing.tasks import invoice_refund_payment
 from fleio.billing.models import Gateway
 from fleio.billing.models import Transaction
 from fleio.billing.models.transaction import TransactionStatus
