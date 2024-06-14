@@ -34,6 +34,12 @@ def check_signature(data: dict) -> None | Exception:
     if sign_md5_obj.hexdigest() != sign:
         raise Exception('Hash is not valid')
 
+def validate_invoice(invoice_id: int):
+    inv = Invoice.objects.get(pk=invoice_id)
+    if inv.balance <= 0 and inv.status == 'paid':
+        LOG.info(f'Invoice {invoice_id} is already paid')
+        raise gateway_exceptions.InvoicePaymentException(f'Invoice {invoice_id} is already paid')
+
 
 @gateway_action(methods=['GET'])
 def pay_invoice(request: HttpRequest) -> HttpResponseRedirect:
@@ -65,7 +71,9 @@ def pay_invoice(request: HttpRequest) -> HttpResponseRedirect:
 @gateway_action(methods=['POST'])
 def callback(request: HttpRequest) -> Response:
     try:
+        invoice_id = request.data.get('order_id')
         check_signature(request.data)
+        validate_invoice(invoice_id)
         payment_process = PaymentProcess(rq_data=request.data)
         payment_process.process_charge()
         return Response({'detail': 'OK'}, status=status.HTTP_200_OK)
