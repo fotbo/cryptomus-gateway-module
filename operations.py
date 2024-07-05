@@ -26,7 +26,9 @@ class PaymentProcess():
         if status in paid_statuses:
             return TransactionStatus.SUCCESS
         elif status in error_statuses:
-            return TransactionStatus.FAILURE
+            raise exceptions.GatewayException(
+                f"Transaction is Fail. Status - {self.rq_data.get('status').upper()}. Invoice - {self.rq_data.get('order_id')}"
+                )
 
     def process_charge(self) -> None:
         gateway = Gateway.objects.get(name='cryptomus')
@@ -68,18 +70,16 @@ class PaymentProcess():
                              status=self.rq_data.get('status'),
                              data=datetime.datetime.now(),
                              error=(self.rq_data.get('status') == 'fail'))
-        if transaction_status == TransactionStatus.FAILURE:
-            raise exceptions.GatewayException(f"Transaction is Fail. Status - {self.rq_data.get('status').upper()}")
-        else:
-            if transaction_status == TransactionStatus.SUCCESS:
-                activity_helper.start_generic_activity(
-                    category_name='cryptomus',
-                    activity_class='cryptomus payment',
-                    invoice_id=invoice_id
-                )
-                invoice_add_payment(
-                    invoice_id=invoice_id, amount=self.rq_data.get('amount'),
-                    currency_code='EUR', transaction_id=transaction_id,
-                )
-
-                activity_helper.end_activity()
+        if transaction_status == TransactionStatus.SUCCESS:
+            activity_helper.start_generic_activity(
+                category_name='cryptomus',
+                activity_class='cryptomus payment',
+                invoice_id=invoice_id
+            )
+            invoice_add_payment(
+                invoice_id=invoice_id,
+                amount=self.rq_data.get('amount'),
+                currency_code='EUR',
+                transaction_id=transaction_id,
+            )
+            activity_helper.end_activity()

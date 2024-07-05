@@ -34,7 +34,7 @@ def check_signature(data: dict) -> None | Exception:
     if sign_md5_obj.hexdigest() != sign:
         raise Exception('Hash is not valid')
 
-def validate_invoice(invoice_id: int):
+def validate_invoice(invoice_id: int) -> None | Exception:
     inv = Invoice.objects.get(pk=invoice_id)
     if inv.balance <= 0 and inv.status == 'paid':
         LOG.info(f'Invoice {invoice_id} is already paid')
