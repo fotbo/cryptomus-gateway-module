@@ -27,12 +27,14 @@ payment = Client.payment(
 def check_signature(data: dict) -> None | Exception:
     sign = data['sign']
     del data['sign']
+    data['txid'] = data['txid'].replace("/", "\\/")
     json_body_data = json.dumps(data, ensure_ascii=False, separators=(',', ':'))
     json_body_data_binary = json_body_data.encode('utf-8')
     encoded_data = base64.b64encode(json_body_data_binary)
     sign_md5_obj = hashlib.md5(encoded_data + conf.api_key.encode('utf-8'))
     if sign_md5_obj.hexdigest() != sign:
         raise Exception('Hash is not valid - invoice {}'.format(data.get('order_id')))
+
 
 def validate_invoice(invoice_id: int) -> None | Exception:
     inv = Invoice.objects.get(pk=invoice_id)
