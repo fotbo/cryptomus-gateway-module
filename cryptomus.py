@@ -27,7 +27,6 @@ payment = Client.payment(
 def check_signature(data: dict) -> None | Exception:
     sign = data['sign']
     del data['sign']
-    data['txid'] = data['txid'].replace("/", "\\/")
     json_body_data = json.dumps(data, ensure_ascii=False, separators=(',', ':'))
     json_body_data_binary = json_body_data.encode('utf-8')
     encoded_data = base64.b64encode(json_body_data_binary)
