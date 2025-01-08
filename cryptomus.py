@@ -81,7 +81,7 @@ def callback(request: HttpRequest) -> Response:
         payment_process.process_charge()
         return Response({'detail': 'OK'}, status=status.HTTP_200_OK)
     except Exception as err:
-        LOG.exception(f"Payment error - {err}")
+        LOG.error(f"Payment error - {err}", exc_info=1)
         return Response(
             {'detail': 'Error'},
             status=status.HTTP_400_BAD_REQUEST)
