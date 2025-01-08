@@ -27,9 +27,10 @@ payment = Client.payment(
 def check_signature(data: dict) -> None | Exception:
     sign = data['sign']
     del data['sign']
-    if (txid := data.get('txid')):
-        data['txid'] = txid.replace('/', '\/')
-    json_body_data = json.dumps(data, ensure_ascii=False, separators=(',', ':'))
+    json_body_data = json.dumps(
+        data,
+        ensure_ascii=False,
+        separators=(',', ':')).replace('/', r'\/')
     json_body_data_binary = json_body_data.encode('utf-8')
     encoded_data = base64.b64encode(json_body_data_binary)
     sign_md5_obj = hashlib.md5(encoded_data + conf.api_key.encode('utf-8'))
@@ -81,7 +82,7 @@ def callback(request: HttpRequest) -> Response:
         payment_process.process_charge()
         return Response({'detail': 'OK'}, status=status.HTTP_200_OK)
     except Exception as err:
-        LOG.error(f"Payment error - {err}", exc_info=1)
+        LOG.error(f"Payment error - {err}")
         return Response(
             {'detail': 'Error'},
             status=status.HTTP_400_BAD_REQUEST)
